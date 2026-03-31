@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caméra & Image</title>
+    <style>
+        /* La caméra prend tout l'écran en fond */
+        #video {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            object-fit: cover; z-index: -1;
+        }
+        /* L'image qu'on va déplacer */
+        #image {
+            position: absolute; top: 100px; left: 100px;
+            width: 200px; cursor: move; touch-action: none;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="video" autoplay playsinline></video>
+    
+    <img id="image" src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="image à bouger">
+
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <script>
+        // 1. Activer la caméra arrière
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => { document.getElementById('video').srcObject = stream; })
+            .catch(err => console.log("Erreur caméra: " + err));
+
+        // 2. Rendre l'image déplaçable et zoomable
+        let angle = 0, scale = 1, x = 0, y = 0;
+        interact('#image').gesturable({
+            listeners: {
+                move (event) {
+                    scale = scale * (1 + event.ds);
+                    angle += event.da;
+                    update();
+                }
+            }
+        }).draggable({
+            listeners: {
+                move (event) {
+                    x += event.dx; y += event.dy;
+                    update();
+                }
+            }
+        });
+
+        function update() {
+            document.getElementById('image').style.transform = 
+                `translate(${x}px, ${y}px) scale(${scale}) rotate(${angle}deg)`;
+        }
+    </script>
+</body>
+</html>
